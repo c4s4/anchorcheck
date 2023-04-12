@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,7 +21,10 @@ func processFile(file string) (bool, error) {
 	page := string(bytes)
 	matches := regexpHref.FindAllStringSubmatch(page, -1)
 	for _, match := range matches {
-		anchor := match[1]
+		anchor, err := url.QueryUnescape(match[1])
+		if err != nil {
+			return false, fmt.Errorf("unescaping anchor: %v", err)
+		}
 		if !strings.Contains(page, `id="`+anchor+`"`) {
 			fmt.Fprintf(os.Stderr, "In file '%s' anchor link %s not found\n", file, anchor)
 			ok = false
