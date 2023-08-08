@@ -1,0 +1,26 @@
+default: build
+
+properties:
+  BUILD_DIR: 'build'
+  TARGETS:
+  - ['darwin', 'arm64']
+  - ['darwin', 'amd64']
+  - ['linux', 'amd64']
+
+targets:
+
+  build:
+    doc: "Build MacOS and Linux binaries"
+    steps:
+    - mkdir: =BUILD_DIR
+    - for: pair
+      in:  =TARGETS
+      do:
+      - 'setenv("GOOS", pair[0])'
+      - 'setenv("GOARCH", pair[1])'
+      - $: ['go', 'build', '-o', '={BUILD_DIR}/anchorcheck-={pair[0]}-={pair[1]}', 'main.go']
+
+  clean:
+    doc: "Clean generated files"
+    steps:
+    - delete: =BUILD_DIR
